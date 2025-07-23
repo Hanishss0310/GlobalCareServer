@@ -494,17 +494,53 @@ app.get('/api/services/:id', async (req, res) => {
   }
 });
 
+// mail with book a quote 
 app.post('/api/quotes', async (req, res) => {
   try {
     const { name, email, phone, product, quoteMessage } = req.body;
+
+    // 1. Save to MongoDB
     const newQuote = new Quote({ name, email, phone, product, quoteMessage });
     await newQuote.save();
-    res.status(200).json({ message: 'Quote saved successfully' });
+
+    // 2. Send Email Notification
+    const transporter = nodemailer.createTransport({
+      service: 'Gmail',
+      auth: {
+        user: 'donotreply.globalcaresurgicals@gmail.com',           // replace with your Gmail
+        pass: 'lohn plzg aelf xcms',              // must use App Password if 2FA enabled
+      },
+    });
+
+    const mailOptions = {
+      from: 'your_email@gmail.com',
+      to: email, // or a fixed admin email like 'globalcare@gmail.com'
+      subject: 'Quote Request Received – Global Care Surgicals',
+      html: `
+        <h2>Thank You, ${name}!</h2>
+        <p>We’ve received your quote request for <strong>${product}</strong>.</p>
+        <p>Our team will reach out to you soon at <strong>${phone}</strong>.</p>
+        <br/>
+        <p><em>Your message:</em> ${quoteMessage}</p>
+      `,
+    };
+
+    await transporter.sendMail(mailOptions);
+
+    res.status(200).json({ message: 'Quote saved and email sent successfully' });
+
   } catch (error) {
     console.error('Quote Error:', error);
-    res.status(500).json({ error: 'Failed to save quote' });
+
+    // More specific message for email auth issues
+    if (error.code === 'EAUTH') {
+      return res.status(500).json({ error: 'Email authentication failed. Please check credentials.' });
+    }
+
+    res.status(500).json({ error: 'Failed to save quote or send email' });
   }
 });
+
 
 // ✅ GET all quote submissions
 app.get('/api/quotes', async (req, res) => {
