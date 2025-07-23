@@ -351,8 +351,8 @@ app.post('/api/contact', async (req, res) => {
     const transporter = nodemailer.createTransport({
       service: 'Gmail', // or 'smtp.hostinger.com' if using Hostinger
       auth: {
-        user: 'office@globalcaresurgicals.in',
-        pass: 'YOUR_APP_PASSWORD', // use App Password or SMTP password
+        user: 'donotreply.globalcaresurgicals@gmail.com',
+        pass: 'eyse urvp qsxj ghip', // use App Password or SMTP password
       },
     });
 
