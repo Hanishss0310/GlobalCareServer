@@ -334,6 +334,7 @@ app.post('/api/products/:id/review', async (req, res) => {
 });
 
 // ===== CONTACT =====
+// API: Save contact and send email
 app.post('/api/contact', async (req, res) => {
   try {
     const { name, email, phone } = req.body;
@@ -342,11 +343,48 @@ app.post('/api/contact', async (req, res) => {
       return res.status(400).json({ error: 'All fields are required' });
     }
 
+    // Save to MongoDB
     const contact = new Contact({ name, email, phone });
     await contact.save();
 
-    res.status(201).json({ message: 'Contact saved successfully' });
+    // Send auto email using Nodemailer
+    const transporter = nodemailer.createTransport({
+      service: 'Gmail', // or 'smtp.hostinger.com' if using Hostinger
+      auth: {
+        user: 'office@globalcaresurgicals.in',
+        pass: 'YOUR_APP_PASSWORD', // use App Password or SMTP password
+      },
+    });
+
+    const mailOptions = {
+      from: '"Global Care Surgicals" <office@globalcaresurgicals.in>',
+      to: email,
+      subject: 'Thanks for Contacting Global Care Surgicals!',
+      html: `
+        <div style="font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: auto;">
+          <h2 style="color: #007B8F;">Hello ${name},</h2>
+          <p>Thank you for reaching out to <strong>Global Care Surgicals</strong>. We’ve received your request and one of our representatives will get in touch with you shortly.</p>
+
+          <p>📞 <strong>Your Provided Number:</strong> ${phone}</p>
+          <p>📱 <strong>Contact Us Directly:</strong> <a href="tel:+919483175375">94831 75375</a></p>
+          <p>🌐 Visit us at: <a href="https://globalcaresurgical.in" target="_blank">globalcaresurgical.in</a></p>
+
+          <br/>
+          <p>Regards,<br/>
+          <strong>Team Global Care Surgicals</strong><br/>
+          <a href="mailto:office@globalcaresurgicals.in">office@globalcaresurgicals.in</a></p>
+
+          <hr style="margin-top: 30px;" />
+          <p style="font-size: 12px; color: #999;">This is an automated message. Please do not reply.</p>
+        </div>
+      `,
+    };
+
+    await transporter.sendMail(mailOptions);
+
+    res.status(201).json({ message: 'Contact saved and email sent successfully' });
   } catch (err) {
+    console.error('❌ Error:', err);
     res.status(500).json({ error: 'Server error' });
   }
 });
