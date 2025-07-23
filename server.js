@@ -352,7 +352,7 @@ app.post('/api/contact', async (req, res) => {
       service: 'Gmail', // or 'smtp.hostinger.com' if using Hostinger
       auth: {
         user: 'donotreply.globalcaresurgicals@gmail.com',
-        pass: 'eyse urvp qsxj ghip', // use App Password or SMTP password
+        pass: 'uqpe miao ixda nqbi', // use App Password or SMTP password
       },
     });
 
