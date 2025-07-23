@@ -34,6 +34,10 @@ if (!fs.existsSync(uploadDir)) {
 
 // Express setup
 const app = express();
+
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ extended: true, limit: '50mb' }));
+
 const allowedOrigins = [
   'https://globaljpkp20caresurgisals746jj.firebaseapp.com',
   'https://globaljpkp20caresurgisals746jj.web.app',
@@ -84,7 +88,13 @@ const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, 'uploads/'),
   filename: (req, file, cb) => cb(null, `${Date.now()}-${file.originalname}`),
 });
-const upload = multer({ storage });
+
+const upload = multer({
+  storage,
+  limits: {
+    fileSize: 50 * 1024 * 1024, // 50 MB max file size
+  },
+});
 
 
 const sendNewsletterWelcomeEmail = async (subscriberEmail) => {
