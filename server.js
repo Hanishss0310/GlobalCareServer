@@ -34,6 +34,11 @@ if (!fs.existsSync(uploadDir)) {
 
 // Express setup
 const app = express();
+// ✅ Increase body size limit here
+app.use(express.json({ limit: '100mb' }));
+app.use(express.urlencoded({ limit: '100mb', extended: true }));
+
+
 const allowedOrigins = [
   'https://globaljpkp20caresurgisals746jj.firebaseapp.com',
   'https://globaljpkp20caresurgisals746jj.web.app',
@@ -76,7 +81,12 @@ const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, 'uploads/'),
   filename: (req, file, cb) => cb(null, `${Date.now()}-${file.originalname}`),
 });
-const upload = multer({ storage });
+
+const upload = multer({
+  storage,
+  limits: { fileSize: 100 * 1024 * 1024 } // 100MB
+});
+
 
 
 const sendNewsletterWelcomeEmail = async (subscriberEmail) => {
@@ -406,14 +416,22 @@ app.post('/api/services', upload.fields([
   try {
     const { title, description, specs, features } = req.body;
 
+    let parsedSpecs = [], parsedFeatures = [];
+    try {
+      parsedSpecs = JSON.parse(specs);
+      parsedFeatures = JSON.parse(features);
+    } catch (e) {
+      return res.status(400).json({ error: 'Invalid JSON in specs or features' });
+    }
+
     const images = (req.files['images'] || []).map(f => `/uploads/${f.filename}`);
     const brochure = req.files['brochure']?.[0]?.filename;
 
     const newService = new Service({
       title,
       description,
-      specs: JSON.parse(specs),
-      features: JSON.parse(features),
+      specs: parsedSpecs,
+      features: parsedFeatures,
       brochure: brochure ? `/uploads/${brochure}` : '',
       images,
     });
@@ -425,6 +443,7 @@ app.post('/api/services', upload.fields([
     res.status(500).json({ error: err.message });
   }
 });
+
 
 app.get('/api/services', async (req, res) => {
   try {
