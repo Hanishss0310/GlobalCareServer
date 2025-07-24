@@ -34,33 +34,41 @@ if (!fs.existsSync(uploadDir)) {
 
 // Express setup
 const app = express();
-app.use(express.json());
-app.use('/uploads', express.static(uploadDir));
+app.use(cors());
+
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
 const allowedOrigins = [
   'https://globaljpkp20caresurgisals746jj.firebaseapp.com',
-  'https://global-care-surgicals-user-app.firebaseapp.com',
-  'https://globalcaresurgical.in'
+  'https://globaljpkp20caresurgisals746jj.web.app',
+  'https://globalcaresurgical.in',
+  'https://secureapi-b8p3vzk19x.globalcaresurgical.in',
+  'https://global-care-surgicals-user-app.firebaseapp.com'
 ];
 
-app.use(cors({
-  origin: function (origin, callback) {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
-}));
+// CORS middleware setup
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+  }
 
-  
+  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type,Authorization');
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+
+  // Handle preflight OPTIONS requests
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(200);
+  }
+
+  next();
+});
 
 
-
+app.use(express.json());
+app.use('/uploads', express.static(uploadDir));
 
 // Security middlewares
 app.use(helmet());
