@@ -34,13 +34,7 @@ if (!fs.existsSync(uploadDir)) {
 
 // Express setup
 const app = express();
-app.use(cors());
-
-app.use(express.json({ limit: '50mb' }));
-app.use(express.urlencoded({ extended: true, limit: '50mb' }));
-
-
-cconst allowedOrigins = [
+const allowedOrigins = [
   'https://globaljpkp20caresurgisals746jj.firebaseapp.com',
   'https://globaljpkp20caresurgisals746jj.web.app',
   'https://globalcaresurgical.in',
@@ -48,26 +42,17 @@ cconst allowedOrigins = [
   'https://global-care-surgicals-user-app.firebaseapp.com'
 ];
 
-// Custom CORS Middleware (✅ CORRECT)
-app.use((req, res, next) => {
-  const origin = req.headers.origin;
-
-  if (allowedOrigins.includes(origin)) {
-    res.setHeader('Access-Control-Allow-Origin', origin);
-  }
-
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  res.setHeader('Access-Control-Allow-Credentials', 'true');
-
-  if (req.method === 'OPTIONS') {
-    return res.sendStatus(200);
-  }
-
-  next();
-});
-
-
+app.use(cors({
+  origin: function (origin, callback) {
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    } else {
+      return callback(new Error('❌ Not allowed by CORS'));
+    }
+  },
+  credentials: true
+}));
 
 app.use(express.json());
 app.use('/uploads', express.static(uploadDir));
@@ -88,16 +73,11 @@ mongoose.connect('mongodb://127.0.0.1:27017/GlobalCare')
 
 // Multer setup
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, "uploads/"),
+  destination: (req, file, cb) => cb(null, 'uploads/'),
   filename: (req, file, cb) => cb(null, `${Date.now()}-${file.originalname}`),
 });
+const upload = multer({ storage });
 
-const upload = multer({
-  storage,
-  limits: {
-    fileSize: 50 * 1024 * 1024, // 50MB
-  },
-});
 
 const sendNewsletterWelcomeEmail = async (subscriberEmail) => {
   try {
