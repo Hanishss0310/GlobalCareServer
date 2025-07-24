@@ -409,41 +409,56 @@ app.get('/api/contact', async (req, res) => {
 });
 
 // ===== SERVICES =====
-app.post('/api/services', upload.fields([
-  { name: 'images', maxCount: 10 },
-  { name: 'brochure', maxCount: 1 },
-]), async (req, res) => {
-  try {
-    const { title, description, specs, features } = req.body;
-
-    let parsedSpecs = [], parsedFeatures = [];
+app.post(
+  '/api/services',
+  upload.fields([
+    { name: 'images', maxCount: 10 },
+    { name: 'brochure', maxCount: 1 },
+  ]),
+  async (req, res) => {
     try {
-      parsedSpecs = JSON.parse(specs);
-      parsedFeatures = JSON.parse(features);
-    } catch (e) {
-      return res.status(400).json({ error: 'Invalid JSON in specs or features' });
+      const { title, description, specs, features } = req.body;
+
+      // Validate required fields
+      if (!title || !description || !specs || !features) {
+        return res.status(400).json({ error: 'Missing required fields' });
+      }
+
+      // Parse JSON strings to arrays
+      let parsedSpecs = [], parsedFeatures = [];
+      try {
+        parsedSpecs = JSON.parse(specs);
+        parsedFeatures = JSON.parse(features);
+        if (!Array.isArray(parsedSpecs) || !Array.isArray(parsedFeatures)) {
+          throw new Error();
+        }
+      } catch (err) {
+        return res.status(400).json({ error: 'Invalid JSON format in specs or features' });
+      }
+
+      // Handle uploaded files
+      const images = (req.files['images'] || []).map(f => `/uploads/${f.filename}`);
+      const brochure = req.files['brochure']?.[0]?.filename;
+
+      // Create new service
+      const newService = new Service({
+        title: title.trim(),
+        description: description.trim(),
+        specs: parsedSpecs,
+        features: parsedFeatures,
+        brochure: brochure ? `/uploads/${brochure}` : '',
+        images,
+      });
+
+      // Save to database
+      await newService.save();
+      res.status(201).json({ message: '✅ Service created', service: newService });
+    } catch (err) {
+      console.error('❌ Error saving service:', err);
+      res.status(500).json({ error: 'Internal server error' });
     }
-
-    const images = (req.files['images'] || []).map(f => `/uploads/${f.filename}`);
-    const brochure = req.files['brochure']?.[0]?.filename;
-
-    const newService = new Service({
-      title,
-      description,
-      specs: parsedSpecs,
-      features: parsedFeatures,
-      brochure: brochure ? `/uploads/${brochure}` : '',
-      images,
-    });
-
-    await newService.save();
-    res.status(201).json({ message: 'Service created', service: newService });
-  } catch (err) {
-    console.error('❌ Error saving service:', err);
-    res.status(500).json({ error: err.message });
   }
-});
-
+);
 
 app.get('/api/services', async (req, res) => {
   try {
