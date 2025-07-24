@@ -84,18 +84,19 @@ mongoose.connect('mongodb://127.0.0.1:27017/GlobalCare')
   .catch((err) => console.error('❌ MongoDB connection error:', err));
 
 // Multer setup
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, 'uploads/'),
-  filename: (req, file, cb) => cb(null, `${Date.now()}-${file.originalname}`),
-});
-
 const upload = multer({
-  storage,
   limits: {
-    fileSize: 50 * 1024 * 1024, // 50 MB max file size
+    fileSize: 20 * 1024 * 1024, // 20MB max per file
   },
+  storage: multer.diskStorage({
+    destination: (req, file, cb) => {
+      cb(null, 'uploads/');
+    },
+    filename: (req, file, cb) => {
+      cb(null, Date.now() + '-' + file.originalname);
+    },
+  }),
 });
-
 
 const sendNewsletterWelcomeEmail = async (subscriberEmail) => {
   try {
