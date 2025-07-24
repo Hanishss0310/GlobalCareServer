@@ -46,13 +46,19 @@ const allowedOrigins = [
   'https://global-care-surgicals-user-app.firebaseapp.com'
 ];
 
-const corsOptions = {
-  origin: 'https://globaljpkp20caresurgisals746jj.firebaseapp.com',
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-};
+app.use(cors({
+  origin: ['https://globaljpkp20caresurgisals746jj.firebaseapp.com'],
+  credentials: true,
+}));
 
-app.use(cors(corsOptions));
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "https://globaljpkp20caresurgisals746jj.firebaseapp.com");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+  res.header("Access-Control-Allow-Credentials", "true");
+  next();
+});
+
 
 // CORS middleware setup
 app.use((req, res, next) => {
