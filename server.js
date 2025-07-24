@@ -46,20 +46,6 @@ const allowedOrigins = [
   'https://global-care-surgicals-user-app.firebaseapp.com'
 ];
 
-app.use(cors({
-  origin: ['https://globaljpkp20caresurgisals746jj.firebaseapp.com'],
-  credentials: true,
-}));
-
-app.use((req, res, next) => {
-  res.header("Access-Control-Allow-Origin", "https://globaljpkp20caresurgisals746jj.firebaseapp.com");
-  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-  res.header("Access-Control-Allow-Credentials", "true");
-  next();
-});
-
-
 // CORS middleware setup
 app.use((req, res, next) => {
   const origin = req.headers.origin;
@@ -98,18 +84,16 @@ mongoose.connect('mongodb://127.0.0.1:27017/GlobalCare')
   .catch((err) => console.error('❌ MongoDB connection error:', err));
 
 // Multer setup
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => cb(null, "uploads/"),
+  filename: (req, file, cb) => cb(null, `${Date.now()}-${file.originalname}`),
+});
+
 const upload = multer({
+  storage,
   limits: {
-    fileSize: 20 * 1024 * 1024, // 20MB max per file
+    fileSize: 50 * 1024 * 1024, // 50MB
   },
-  storage: multer.diskStorage({
-    destination: (req, file, cb) => {
-      cb(null, 'uploads/');
-    },
-    filename: (req, file, cb) => {
-      cb(null, Date.now() + '-' + file.originalname);
-    },
-  }),
 });
 
 const sendNewsletterWelcomeEmail = async (subscriberEmail) => {
