@@ -262,11 +262,23 @@ app.get('/api/newsletter', async (req, res) => {
 app.post('/api/products', upload.array('images', 4), async (req, res) => {
   try {
     const {
-      name, category, rating, description,
-      material, dimensions, ventilation, reusable,
+      name,
+      category,
+      rating,
+      description,
+      material,
+      dimensions,
+      ventilation,
+      reusable,
       details,
     } = req.body;
 
+    // ✅ Validate required fields
+    if (!name || !category || category === '' || category === 'Select a Category') {
+      return res.status(400).json({ error: 'Please select a valid category and fill all required fields.' });
+    }
+
+    // ✅ Save image paths
     const imagePaths = req.files.map((file) => `/uploads/${file.filename}`);
 
     const product = new Product({
@@ -288,6 +300,7 @@ app.post('/api/products', upload.array('images', 4), async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
 
 app.get('/api/products', async (req, res) => {
   try {
