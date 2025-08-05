@@ -17,9 +17,11 @@ import AskQuery from './Models/AskQuery.js';
 import Newsletter from './Models/Newsletter.js';
 import Product from './Models/Product.js';
 import Contact from './Models/Contact.js';
-import Service from './Models/Service.js'; // ✅ ADDED
+import Service from './Models/Service.js'; 
 import Quote from './Models/Quote.js';
-import HospitalCard from './Models/HospitalsCards.js'; // ✅ ADDED
+import Furniture from './Models/Furniture.js';
+
+import HospitalCard from './Models/HospitalsCards.js'; 
 
 // __dirname fix for ES Modules
 const __filename = fileURLToPath(import.meta.url);
@@ -644,6 +646,39 @@ app.delete("/api/hospitals/:id", async (req, res) => {
   }
 });
 
+
+// POST: Add new furniture
+app.post('/api/hospital-furnitures', async (req, res) => {
+  try {
+    const { title, description, image } = req.body;
+    const newFurniture = new Furniture({ title, description, image });
+    await newFurniture.save();
+    res.status(201).json(newFurniture);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to add furniture' });
+  }
+});
+
+// GET: Get all furniture
+app.get('/api/hospital-furnitures', async (req, res) => {
+  try {
+    const items = await Furniture.find().sort({ createdAt: -1 });
+    res.status(200).json(items);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch furniture' });
+  }
+});
+
+// DELETE: Delete furniture by ID
+app.delete('/api/hospital-furnitures/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    await Furniture.findByIdAndDelete(id);
+    res.status(200).json({ message: 'Furniture deleted successfully' });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to delete furniture' });
+  }
+});
 
 
 
