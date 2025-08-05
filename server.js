@@ -664,14 +664,18 @@ app.post('/api/hospital-furnitures', upload.single('image'), async (req, res) =>
 });
 
 // Get all furniture
-app.get('/api/hospital-furnitures', async (req, res) => {
+app.get('/api/hospital-furnitures/:id', async (req, res) => {
   try {
-    const allFurniture = await Furniture.find().sort({ createdAt: -1 });
-    res.json(allFurniture);
+    const item = await Furniture.findById(req.params.id);
+    if (!item) {
+      return res.status(404).json({ error: 'Furniture not found' });
+    }
+    res.json(item);
   } catch (err) {
-    res.status(500).json({ error: 'Failed to fetch furniture' });
+    res.status(500).json({ error: 'Failed to fetch furniture details' });
   }
 });
+
 
 // Delete furniture by ID
 app.delete('/api/hospital-furnitures/:id', async (req, res) => {
