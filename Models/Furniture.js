@@ -1,19 +1,22 @@
+// models/Furniture.js
+
 import mongoose from 'mongoose';
 
-const furnitureSchema = new mongoose.Schema({
-  title: {
-    type: String,
-    required: true,
+const furnitureSchema = new mongoose.Schema(
+  {
+    title: { type: String, required: true },
+    description: { type: String, required: true },
+    image: { type: String, required: true },
+
+    // Add these fields:
+    length: { type: String },
+    width: { type: String },
+    height: { type: String },
+    material: { type: String },
+    specifications: [String], // <-- this is for the specs textarea array
   },
-  description: {
-    type: String,
-    required: true,
-  },
-  image: {
-    type: String, // Only the filename is stored (not full URL)
-    required: true,
-  },
-}, { timestamps: true });
+  { timestamps: true }
+);
 
 const Furniture = mongoose.model('Furniture', furnitureSchema);
 
