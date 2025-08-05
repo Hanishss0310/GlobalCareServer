@@ -647,38 +647,45 @@ app.delete("/api/hospitals/:id", async (req, res) => {
 });
 
 
-// POST: Add new furniture
-app.post('/api/hospital-furnitures', async (req, res) => {
+app.post('/api/hospital-furnitures', upload.single('image'), async (req, res) => {
   try {
-    const { title, description, image } = req.body;
+    const { title, description } = req.body;
+    const image = req.file?.filename;
+
+    if (!image) return res.status(400).json({ error: 'Image is required' });
+
     const newFurniture = new Furniture({ title, description, image });
     await newFurniture.save();
     res.status(201).json(newFurniture);
   } catch (err) {
+    console.error(err);
     res.status(500).json({ error: 'Failed to add furniture' });
   }
 });
 
-// GET: Get all furniture
+// Get all furniture
 app.get('/api/hospital-furnitures', async (req, res) => {
   try {
-    const items = await Furniture.find().sort({ createdAt: -1 });
-    res.status(200).json(items);
+    const allFurniture = await Furniture.find().sort({ createdAt: -1 });
+    res.json(allFurniture);
   } catch (err) {
     res.status(500).json({ error: 'Failed to fetch furniture' });
   }
 });
 
-// DELETE: Delete furniture by ID
+// Delete furniture by ID
 app.delete('/api/hospital-furnitures/:id', async (req, res) => {
   try {
-    const { id } = req.params;
-    await Furniture.findByIdAndDelete(id);
-    res.status(200).json({ message: 'Furniture deleted successfully' });
+    const deleted = await Furniture.findByIdAndDelete(req.params.id);
+    if (!deleted) {
+      return res.status(404).json({ error: 'Furniture not found' });
+    }
+    res.json({ message: 'Furniture deleted successfully' });
   } catch (err) {
     res.status(500).json({ error: 'Failed to delete furniture' });
   }
 });
+
 
 
 

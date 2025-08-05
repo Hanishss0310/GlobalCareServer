@@ -10,10 +10,11 @@ const furnitureSchema = new mongoose.Schema({
     required: true,
   },
   image: {
-    type: String,
+    type: String, // Only the filename is stored (not full URL)
     required: true,
   },
 }, { timestamps: true });
 
 const Furniture = mongoose.model('Furniture', furnitureSchema);
+
 export default Furniture;
