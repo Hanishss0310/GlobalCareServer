@@ -107,11 +107,11 @@ const sendNewsletterWelcomeEmail = async (subscriberEmail) => {
       subject: 'Thank you for subscribing to Global Care Surgicals!',
       html: `
         <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
-          <h2 style="color: #007bff;">🌟 Welcome to Global Care Surgicals!</h2>
+          <h2 style="color: #007bff;">🌟 Welcome to Global Care Surgicals.</h2>
           <p>Hi there,</p>
           <p>Thank you for subscribing to our newsletter! We're thrilled to have you on board.</p>
           <p>Stay tuned for updates on our latest surgical innovations, cleanroom solutions, and healthcare infrastructure services.</p>
-          <a href="https://www.globalcaresurgicals.in" style="display:inline-block; margin: 15px 0; padding: 10px 20px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px;">
+          <a href="https://www.globalcaresurgical.in" style="display:inline-block; margin: 15px 0; padding: 10px 20px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px;">
             Visit Our Website
           </a>
           <p>Warm regards,<br>Team Global Care Surgicals</p>
