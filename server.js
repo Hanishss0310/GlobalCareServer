@@ -703,25 +703,32 @@ app.delete('/api/hospital-furnitures/:id', async (req, res) => {
 // POST: Add product
 app.post('/api/ccsd-products', upload.single('image'), async (req, res) => {
   try {
-    const { description } = req.body;
-    const specialties = Array.isArray(req.body.specialties) ? req.body.specialties : [req.body.specialties];
-    const features = Array.isArray(req.body.features) ? req.body.features : [req.body.features];
+    const { title, material, description, specifications, features, specialties } = req.body;
+    
+    if (!title) {
+      return res.status(400).json({ error: 'Title is required' });
+    }
+
+    const imagePath = req.file ? `/uploads/${req.file.filename}` : '';
 
     const newProduct = new CCSDProduct({
       title,
+      material,
       description,
-      specialties,
-      features,
-      image: req.file ? `${req.protocol}://${req.get('host')}/${req.file.path.replace(/\\/g, '/')}` : null,
+      specifications: specifications ? JSON.parse(specifications) : [],
+      features: features ? JSON.parse(features) : [],
+      specialties: specialties ? JSON.parse(specialties) : [],
+      image: imagePath,
     });
 
     await newProduct.save();
     res.status(201).json(newProduct);
   } catch (error) {
     console.error('Add product error:', error);
-    res.status(500).json({ message: 'Failed to add product' });
+    res.status(500).json({ error: 'Failed to add product' });
   }
 });
+
 
 // GET: All products
 app.get('/api/ccsd-products', async (req, res) => {
