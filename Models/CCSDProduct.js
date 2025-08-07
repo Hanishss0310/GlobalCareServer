@@ -5,6 +5,7 @@ const CCSDProductSchema = new mongoose.Schema(
     description: {
       type: String,
       required: true,
+      trim: true,
     },
     specialties: {
       type: [String],
@@ -15,13 +16,16 @@ const CCSDProductSchema = new mongoose.Schema(
       default: [],
     },
     image: {
-      type: String,
-      required: false,
+      type: String, // e.g., /uploads/filename.jpg
+      default: '',   // Not required but defaults to empty
     },
   },
-  { timestamps: true }
+  {
+    timestamps: true,
+  }
 );
 
-const CCSDProduct = mongoose.model('CCSDProduct', CCSDProductSchema);
+// Optional: Prevent model overwrite in development (useful in serverless functions)
+const CCSDProduct = mongoose.models.CCSDProduct || mongoose.model('CCSDProduct', CCSDProductSchema);
 
 export default CCSDProduct;
