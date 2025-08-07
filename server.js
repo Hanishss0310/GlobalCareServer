@@ -699,6 +699,68 @@ app.delete('/api/hospital-furnitures/:id', async (req, res) => {
 });
 
 
+// CCSD Product
+// POST: Add product
+app.post('/api/ccsd-products', upload.single('image'), async (req, res) => {
+  try {
+    const { description } = req.body;
+    const specialties = Array.isArray(req.body.specialties) ? req.body.specialties : [req.body.specialties];
+    const features = Array.isArray(req.body.features) ? req.body.features : [req.body.features];
+
+    const newProduct = new CCSDProduct({
+      description,
+      specialties,
+      features,
+      image: req.file ? `${req.protocol}://${req.get('host')}/${req.file.path.replace(/\\/g, '/')}` : null,
+    });
+
+    await newProduct.save();
+    res.status(201).json(newProduct);
+  } catch (error) {
+    console.error('Add product error:', error);
+    res.status(500).json({ message: 'Failed to add product' });
+  }
+});
+
+// GET: All products
+app.get('/api/ccsd-products', async (req, res) => {
+  try {
+    const products = await CCSDProduct.find().sort({ createdAt: -1 });
+    res.json(products);
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to fetch products' });
+  }
+});
+
+// GET: Product by ID
+app.get('/api/ccsd-products/:id', async (req, res) => {
+  try {
+    const product = await CCSDProduct.findById(req.params.id);
+    if (!product) return res.status(404).json({ message: 'Product not found' });
+    res.json(product);
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to fetch product' });
+  }
+});
+
+// DELETE: Product by ID
+app.delete('/api/ccsd-products/:id', async (req, res) => {
+  try {
+    const product = await CCSDProduct.findById(req.params.id);
+    if (!product) return res.status(404).json({ message: 'Product not found' });
+
+    // Delete image file
+    if (product.image) {
+      const localPath = path.join(__dirname, product.image.replace(`${req.protocol}://${req.get('host')}/`, ''));
+      if (fs.existsSync(localPath)) fs.unlinkSync(localPath);
+    }
+
+    await CCSDProduct.findByIdAndDelete(req.params.id);
+    res.json({ message: 'Product deleted' });
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to delete product' });
+  }
+});
 
 
 // ===== START SERVER =====
