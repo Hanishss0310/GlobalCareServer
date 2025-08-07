@@ -703,44 +703,28 @@ app.delete('/api/hospital-furnitures/:id', async (req, res) => {
 // POST: Add product
 app.post('/api/ccsd-products', upload.single('image'), async (req, res) => {
   try {
-    const { title, description } = req.body;
+    const { title, description, specialties, features } = req.body;
 
-    // Safely parse specialties and features
-    let specialties = [];
-    let features = [];
-
-    // If frontend sends comma-separated strings like "a,b,c"
-    if (typeof req.body.specialties === 'string') {
-      specialties = req.body.specialties.split(',').map(s => s.trim());
-    } else if (Array.isArray(req.body.specialties)) {
-      specialties = req.body.specialties;
-    }
-
-    if (typeof req.body.features === 'string') {
-      features = req.body.features.split(',').map(f => f.trim());
-    } else if (Array.isArray(req.body.features)) {
-      features = req.body.features;
-    }
-
-    const imageUrl = req.file
-      ? `${req.protocol}://${req.get('host')}/${req.file.path.replace(/\\/g, '/')}`
-      : null;
+    // Parse JSON strings if sent as string (especially from FormData)
+    const parsedSpecialties = typeof specialties === 'string' ? JSON.parse(specialties) : specialties;
+    const parsedFeatures = typeof features === 'string' ? JSON.parse(features) : features;
 
     const newProduct = new CCSDProduct({
       title,
       description,
-      specialties,
-      features,
-      image: imageUrl,
+      specialties: Array.isArray(parsedSpecialties) ? parsedSpecialties : [],
+      features: Array.isArray(parsedFeatures) ? parsedFeatures : [],
+      image: req.file ? `https://${req.get('host')}/${req.file.path.replace(/\\/g, '/')}` : null,
     });
 
     await newProduct.save();
     res.status(201).json(newProduct);
   } catch (error) {
     console.error('Add product error:', error);
-    res.status(500).json({ message: 'Failed to add product' });
+    res.status(500).json({ message: 'Failed to add product', error: error.message });
   }
 });
+
 
 
 // GET: All products
