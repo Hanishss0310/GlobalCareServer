@@ -1,22 +1,27 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
-const CCSDProductSchema = new mongoose.Schema({
-  description: {
-    type: String,
-    required: true,
+const CCSDProductSchema = new mongoose.Schema(
+  {
+    description: {
+      type: String,
+      required: true,
+    },
+    specialties: {
+      type: [String],
+      default: [],
+    },
+    features: {
+      type: [String],
+      default: [],
+    },
+    image: {
+      type: String,
+      required: false,
+    },
   },
-  specialties: {
-    type: [String],
-    default: [],
-  },
-  features: {
-    type: [String],
-    default: [],
-  },
-  image: {
-    type: String, // Store image URL or file path
-    required: false,
-  },
-}, { timestamps: true });
+  { timestamps: true }
+);
 
-module.exports = mongoose.model('CCSDProduct', CCSDProductSchema);
+const CCSDProduct = mongoose.model('CCSDProduct', CCSDProductSchema);
+
+export default CCSDProduct;
