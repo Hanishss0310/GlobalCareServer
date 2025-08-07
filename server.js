@@ -703,25 +703,25 @@ app.delete('/api/hospital-furnitures/:id', async (req, res) => {
 // POST: Add product
 app.post('/api/ccsd-products', upload.single('image'), async (req, res) => {
   try {
-    const { title, description, specialties, features } = req.body;
-
-    // Parse JSON strings if sent as string (especially from FormData)
-    const parsedSpecialties = typeof specialties === 'string' ? JSON.parse(specialties) : specialties;
-    const parsedFeatures = typeof features === 'string' ? JSON.parse(features) : features;
+    const { title, description } = req.body;
+    const specialties = Array.isArray(req.body.specialties) ? req.body.specialties : [req.body.specialties];
+    const features = Array.isArray(req.body.features) ? req.body.features : [req.body.features];
 
     const newProduct = new CCSDProduct({
       title,
       description,
-      specialties: Array.isArray(parsedSpecialties) ? parsedSpecialties : [],
-      features: Array.isArray(parsedFeatures) ? parsedFeatures : [],
-      image: req.file ? `https://${req.get('host')}/${req.file.path.replace(/\\/g, '/')}` : null,
+      specialties,
+      features,
+      image: req.file
+        ? `https://secureapi-b8p3vzk19x.globalcaresurgical.in/${req.file.path.replace(/\\/g, '/')}`
+        : null,
     });
 
     await newProduct.save();
     res.status(201).json(newProduct);
   } catch (error) {
     console.error('Add product error:', error);
-    res.status(500).json({ message: 'Failed to add product', error: error.message });
+    res.status(500).json({ message: 'Failed to add product' });
   }
 });
 
