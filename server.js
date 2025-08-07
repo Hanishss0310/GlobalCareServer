@@ -708,6 +708,7 @@ app.post('/api/ccsd-products', upload.single('image'), async (req, res) => {
     const features = Array.isArray(req.body.features) ? req.body.features : [req.body.features];
 
     const newProduct = new CCSDProduct({
+      title,
       description,
       specialties,
       features,
