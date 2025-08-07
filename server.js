@@ -703,29 +703,42 @@ app.delete('/api/hospital-furnitures/:id', async (req, res) => {
 // POST: Add product
 app.post('/api/ccsd-products', upload.single('image'), async (req, res) => {
   try {
-    const { title, material, description, specifications, features, specialties } = req.body;
-    
-    if (!title) {
-      return res.status(400).json({ error: 'Title is required' });
+    const { title, description } = req.body;
+
+    // Safely parse specialties and features
+    let specialties = [];
+    let features = [];
+
+    // If frontend sends comma-separated strings like "a,b,c"
+    if (typeof req.body.specialties === 'string') {
+      specialties = req.body.specialties.split(',').map(s => s.trim());
+    } else if (Array.isArray(req.body.specialties)) {
+      specialties = req.body.specialties;
     }
 
-    const imagePath = req.file ? `/uploads/${req.file.filename}` : '';
+    if (typeof req.body.features === 'string') {
+      features = req.body.features.split(',').map(f => f.trim());
+    } else if (Array.isArray(req.body.features)) {
+      features = req.body.features;
+    }
+
+    const imageUrl = req.file
+      ? `${req.protocol}://${req.get('host')}/${req.file.path.replace(/\\/g, '/')}`
+      : null;
 
     const newProduct = new CCSDProduct({
       title,
-      material,
       description,
-      specifications: specifications ? JSON.parse(specifications) : [],
-      features: features ? JSON.parse(features) : [],
-      specialties: specialties ? JSON.parse(specialties) : [],
-      image: imagePath,
+      specialties,
+      features,
+      image: imageUrl,
     });
 
     await newProduct.save();
     res.status(201).json(newProduct);
   } catch (error) {
     console.error('Add product error:', error);
-    res.status(500).json({ error: 'Failed to add product' });
+    res.status(500).json({ message: 'Failed to add product' });
   }
 });
 
